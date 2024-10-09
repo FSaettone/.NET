@@ -1,0 +1,193 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Consola\\SGI.Consola.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj",
+        "projectName": "SGI.Aplicacion",
+        "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj",
+        "packagesPath": "C:\\Users\\facus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\facus\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Consola\\SGI.Consola.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Consola\\SGI.Consola.csproj",
+        "projectName": "SGI.Consola",
+        "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Consola\\SGI.Consola.csproj",
+        "packagesPath": "C:\\Users\\facus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Consola\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\facus\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj": {
+                "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj"
+              },
+              "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\SGI.Repositorios.csproj": {
+                "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\SGI.Repositorios.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\SGI.Repositorios.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\SGI.Repositorios.csproj",
+        "projectName": "SGI.Repositorios",
+        "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\SGI.Repositorios.csproj",
+        "packagesPath": "C:\\Users\\facus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Repositorios\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\facus\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj": {
+                "projectPath": "C:\\Users\\facus\\proyectosDotnet\\SGI\\SGI.Aplicacion\\SGI.Aplicacion.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
