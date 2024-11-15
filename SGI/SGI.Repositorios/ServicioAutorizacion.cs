@@ -1,24 +1,34 @@
 using System;
-using SGI.Aplicacion;
 
 namespace SGI.Repositorios;
-
-public class ServicioAutorizacion : IServicioAutorizacion
+using SGI.Aplicacion;
+public class ServicioSesion : IServicioAutorizacion
 {
-    public bool PoseeElPermiso(int IDUsuario, Permiso permiso)
-    {
-        if (IDUsuario == 1)
-        {
-            return true;
-        }   
-        else 
-        {
-            throw new PermisosException($"El usuario con ID: {IDUsuario} no tiene permisos para realizar esta acción");
-        }
-        
+    private Usuario? _currentUser; 
 
-        /*Este servicio siempre debe responder true cuando el 
-        IdUsuario sea igual a 1 y false en cualquier otro caso (no hace falta realizar
-        ninguna verificación).*/
+    public void IniciarSesion(Usuario usuario)
+    {
+        _currentUser = usuario;
+    }
+
+    public void CerrarSesion()
+    {
+        _currentUser = null;
+    }
+
+    public Usuario? ObtenerUsuarioActual()
+    {
+        return _currentUser;
+    }
+
+    public bool EstaLogueado()
+    {
+        return _currentUser != null;
+    }
+
+
+    public bool tienePermiso(Permiso permiso)
+    {
+        return _currentUser?.Permisos.Contains(permiso) ?? false;
     }
 }

@@ -1,0 +1,99 @@
+@page "/baja-transaccion"
+@inject UseCase_BajaTransaccion UseCaseBajaTransaccion
+@inject IRepositorioTransaccion RepositorioTransaccion
+@inject IRepositorioProducto RepositorioProducto
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Baja de Transacción</h3>
+
+<select @bind="selectedTransaccionId">
+    <option value="0">Seleccione una transacción</option>
+    @foreach (var transaccion in transacciones)
+    {
+        <option value="@transaccion.ID">Nombre del Producto: @BuscarProducto(transaccion.ID)   Cantidad: @transaccion.Cantidad  Fecha: @transaccion.FechaTransaccion</option>
+    }
+</select><br>
+@if (showWarnings && selectedTransaccionId == 0)
+{
+    <span style="color: red;">Debe seleccionar una transacción</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="BajaTransaccion">Dar de Baja Transacción</button>
+
+@code {
+    private List<Transaccion> transacciones = new List<Transaccion>();
+    private List<Producto> productos = new List<Producto>();
+    private int selectedTransaccionId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        transacciones = RepositorioTransaccion.ObtenerTodos();
+        productos = RepositorioProducto.ObtenerTodos();
+    }
+    private String BuscarProducto(int id)
+    {
+        string nombre;
+        foreach (var producto in productos)
+        {
+            if (producto.ID == id)
+            {
+                nombre = producto.Nombre;
+                return nombre;
+            }
+        }
+        return "No encontrado";
+    }
+    private void BajaTransaccion()
+    {
+        showWarnings = true;
+
+        if (selectedTransaccionId == 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseBajaTransaccion.Ejecutar(selectedTransaccionId);
+            exito = "La transacción ha sido dada de baja con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            transacciones = RepositorioTransaccion.ObtenerTodos(); // Actualizar la lista de transacciones
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

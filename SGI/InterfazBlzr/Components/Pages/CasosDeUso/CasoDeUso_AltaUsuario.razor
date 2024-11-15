@@ -1,0 +1,108 @@
+@page "/alta-usuario"
+@inject UseCase_AltaUsuario UseCaseAltaUsuario
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer 
+
+<h3>Alta de Usuario</h3>
+
+<input placeholder="Nombre" @bind="usuario.Nombre" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(usuario.Nombre))
+{
+    <span style="color: red;">El nombre es obligatorio</span><br>
+}
+
+<input placeholder="Apellido" @bind="usuario.Apellido" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(usuario.Apellido))
+{
+    <span style="color: red;">El apellido es obligatorio</span><br>
+}
+
+<input placeholder="Email" @bind="usuario.Email" type="email" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(usuario.Email))
+{
+    <span style="color: red;">El email es obligatorio</span><br>
+}
+
+<input placeholder="Contraseña" @bind="usuario.Password" type="password" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(usuario.Password))
+{
+    <span style="color: red;">La contraseña es obligatoria</span><br>
+}
+
+<h4>Permisos</h4>
+@foreach (var permiso in permisosDisponibles)
+{
+    <label>
+        <input type="checkbox" @bind="permisoSeleccionado[permiso]" /> @permiso
+    </label><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="AgregarUsuario">Agregar Usuario</button>
+
+@code {
+    private Usuario usuario = new Usuario();
+    private List<Permiso> permisosDisponibles = Enum.GetValues(typeof(Permiso)).Cast<Permiso>().ToList();
+    private Dictionary<Permiso, bool> permisoSeleccionado = new Dictionary<Permiso, bool>();
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        foreach (var permiso in permisosDisponibles)
+        {
+            permisoSeleccionado[permiso] = false;
+        }
+    }
+
+    private void AgregarUsuario()
+    {
+        showWarnings = true;
+
+        if (string.IsNullOrWhiteSpace(usuario.Nombre) ||
+            string.IsNullOrWhiteSpace(usuario.Apellido) ||
+            string.IsNullOrWhiteSpace(usuario.Email) ||
+            string.IsNullOrWhiteSpace(usuario.Password))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        var permisosAAsignar = permisoSeleccionado.Where(p => p.Value).Select(p => p.Key).ToList();
+        usuario.Permisos = permisosAAsignar;
+
+        try
+        {
+            UseCaseAltaUsuario.Ejecutar(usuario);
+            exito = $"El usuario {usuario.Nombre} ha sido dado de alta con éxito";
+            usuario = new Usuario(); 
+            warningMessage = string.Empty; 
+            showWarnings = false; 
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty; 
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty; 
+        }
+    }
+}

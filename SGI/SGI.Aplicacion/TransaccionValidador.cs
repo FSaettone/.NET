@@ -12,12 +12,13 @@ public class TransaccionValidador
         }
     }
     
-    public void ValidarBajaProducto(int ID, IRepositorio<Transaccion> repo)
+    
+    public void ValidarBajaProducto(int ID, IRepositorioTransaccion repo)
     {
         var transacciones = repo.ObtenerTodos();
         foreach (var transaccion in transacciones)
         {
-            if (transaccion.ProductoID == ID)
+            if (transaccion.ProductoID == ID) 
             {
                 repo.Baja(transaccion.ID);//Elimino la transaccion directamente sin incrementar o decrementar el stock del producto, ya que dicho producto esta siendo eliminado.                
             }

@@ -2,19 +2,11 @@ using System;
 
 namespace SGI.Aplicacion;
 
-public class UseCase_ModificarProducto (IRepositorio<Producto> repo,IServicioAutorizacion servicioAutorizacion)
+public class UseCase_ModificarProducto (IRepositorioProducto repo,IServicioAutorizacion servicioAutorizacion)
 {
-    public void Ejecutar(Producto producto, int idUsuario)
-    {
-        try
-        {
-            servicioAutorizacion.PoseeElPermiso(idUsuario, Permiso.ProductoModificacion);
-            repo.Modificar(producto);
-            //Console.WriteLine($"El producto {producto.Nombre} ha sido modificado con exito");
-        }
-        catch(PermisosException ex)
-        {
-            Console.WriteLine("Error de Permisos: "+ex.Message);
-        }
+    public void Ejecutar(Producto producto)
+    {   
+        servicioAutorizacion.tienePermiso(Permiso.ProductoModificacion);
+        repo.Modificar(producto);     
     }
 }

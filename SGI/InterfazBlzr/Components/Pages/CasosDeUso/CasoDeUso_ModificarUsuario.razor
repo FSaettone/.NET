@@ -1,0 +1,136 @@
+@page "/modificar-usuario"
+@inject UseCase_ModificarUsuario UseCaseModificarUsuario
+@inject IRepositorioUsuario RepositorioUsuario
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Modificar Usuario</h3>
+
+<select @onchange="CargarUsuario">
+    <option value="0">Seleccione un usuario</option>
+    @foreach (var usuario in usuarios)
+    {
+        <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido</option>
+    }
+</select><br>
+@if (showWarnings && selectedUsuarioId == 0)
+{
+    <span style="color: red;">Debe seleccionar un usuario</span><br>
+}
+
+@if (usuario != null)
+{
+    <input placeholder="Nombre" @bind="usuario.Nombre" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(usuario.Nombre))
+    {
+        <span style="color: red;">El nombre es obligatorio</span><br>
+    }
+
+    <input placeholder="Apellido" @bind="usuario.Apellido" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(usuario.Apellido))
+    {
+        <span style="color: red;">El apellido es obligatorio</span><br>
+    }
+
+    <input placeholder="Email" @bind="usuario.Email" type="email" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(usuario.Email))
+    {
+        <span style="color: red;">El email es obligatorio</span><br>
+    }
+
+    <input placeholder="Contraseña" @bind="usuario.Password" type="password" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(usuario.Password))
+    {
+        <span style="color: red;">La contraseña es obligatoria</span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(exito))
+    {
+        <span style="color: green;">@exito </span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(warningMessage))
+    {
+        <span style="color: red;">@warningMessage </span><br>
+    }
+
+    <button @onclick="ModificarUsuario">Modificar</button>
+}
+else
+{
+    <p>No se pudo cargar la información del usuario.</p>
+}
+
+@code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    private Usuario? usuario;
+    private int selectedUsuarioId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else if (!ServicioAutorizacion.tienePermiso(Permiso.UsuarioModificacion))
+        {
+            NavigationManager.NavigateTo("/"); // Redirigir si no tiene permiso
+        }
+        else
+        {
+            usuarios = RepositorioUsuario.ObtenerTodos();
+        }
+    }
+
+    private void CargarUsuario(ChangeEventArgs e)
+    {
+        if (e.Value != null && int.TryParse(e.Value.ToString(), out int usuarioId))
+        {
+            selectedUsuarioId = usuarioId;
+            usuario = RepositorioUsuario.ObtenerPorID(usuarioId);
+        }
+    }
+
+    private void ModificarUsuario()
+    {
+        showWarnings = true;
+
+        if (usuario == null || selectedUsuarioId == 0 ||
+            string.IsNullOrWhiteSpace(usuario.Nombre) ||
+            string.IsNullOrWhiteSpace(usuario.Apellido) ||
+            string.IsNullOrWhiteSpace(usuario.Email) ||
+            string.IsNullOrWhiteSpace(usuario.Password))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseModificarUsuario.Ejecutar(usuario);
+            exito = "Los datos del usuario han sido modificados con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            usuarios = RepositorioUsuario.ObtenerTodos(); // Actualizar la lista de usuarios
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

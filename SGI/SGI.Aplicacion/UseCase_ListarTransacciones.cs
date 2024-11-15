@@ -2,30 +2,18 @@ using System;
 
 namespace SGI.Aplicacion;
 
-public class UseCase_ListarTransacciones (IRepositorio<Transaccion> repoTransaccion)
+public class UseCase_ListarTransacciones (IRepositorioTransaccion repoTransaccion)
 {
 
-    public void ListarTransacciones()
+    public List<Transaccion> Ejecutar()
     {
-        var transacciones=repoTransaccion.ObtenerTodos();
-        Console.WriteLine("Listado de todas las transacciones");
-        foreach(var transaccion in transacciones)
-        {
-            Console.WriteLine(transaccion);
-        }
+        return repoTransaccion.ObtenerTodos();
     }
 
 
-    public void ListarTransacciones(DateTime fechaInicio, DateTime fechaFin)
+    public List<Transaccion> ListarTransacciones(DateTime fechaInicio, DateTime fechaFin)
     {
         var transacciones=repoTransaccion.ObtenerTodos();
-        Console.WriteLine($"Listado de todas las transacciones entre {fechaInicio} y {fechaFin}");
-        foreach(var transaccion in transacciones)
-        {
-            if(transaccion.FechaCreacion>=fechaInicio && transaccion.FechaCreacion<=fechaFin)
-            {
-                Console.WriteLine(transaccion);
-            }
-        }
+        return transacciones.FindAll(t => t.FechaTransaccion >= fechaInicio && t.FechaTransaccion <= fechaFin);
     }
 }

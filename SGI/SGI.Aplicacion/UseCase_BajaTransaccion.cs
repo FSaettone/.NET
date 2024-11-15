@@ -2,39 +2,28 @@ using System;
 
 namespace SGI.Aplicacion;
 
-public class UseCase_BajaTransaccion (IRepositorio<Transaccion> repoTransaccion, IServicioAutorizacion servicioAutorizacion, IRepositorio<Producto> repoProducto)
+public class UseCase_BajaTransaccion (IRepositorioTransaccion repoTransaccion, IServicioAutorizacion servicioAutorizacion, IRepositorioProducto repoProducto)
 {
     private readonly UseCase_ModificarProducto modificador= new UseCase_ModificarProducto(repoProducto, servicioAutorizacion);
-    public void Ejecutar(int ID, int idUsuario)
+    public void Ejecutar(int ID)
     {
-        try
-        {
-        servicioAutorizacion.PoseeElPermiso(idUsuario, Permiso.TransaccionBaja);
+        
+        servicioAutorizacion.tienePermiso(Permiso.TransaccionBaja);
         var transaccion=repoTransaccion.ObtenerPorID(ID);
         if(transaccion!=null)
         {
             var producto=repoProducto.ObtenerPorID(transaccion.ProductoID);
-            ActualizarStock(transaccion, producto, idUsuario);
+            ActualizarStock(transaccion, producto);
             repoTransaccion.Baja(ID);
-            Console.WriteLine($"La transaccion con ID: {transaccion.ID} ha sido dada de baja con exito");
         }
         else 
         {
             throw new ValidacionException("No se encontro la transaccion con el ID: "+ID);
         }
-        }
-        catch (PermisosException ex)
-        {
-            Console.WriteLine("Error de Permisos: "+ex.Message);
-        }
-        catch (ValidacionException ex)
-        {
-            Console.WriteLine("Error de Validacion: "+ex.Message);
-        }
     }
 
 
-    private void ActualizarStock(Transaccion transaccion, Producto? producto, int idUsuario)
+    private void ActualizarStock(Transaccion transaccion, Producto? producto)
     {
         if(producto!=null)
         {
@@ -51,6 +40,6 @@ public class UseCase_BajaTransaccion (IRepositorio<Transaccion> repoTransaccion,
         {
             throw new ValidacionException("Producto Invalido");
         }
-        modificador.Ejecutar(producto,idUsuario);
+        modificador.Ejecutar(producto);
     }
 }

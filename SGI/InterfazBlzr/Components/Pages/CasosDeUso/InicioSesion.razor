@@ -1,0 +1,73 @@
+@page "/inicio-sesion"
+@rendermode InteractiveServer
+@inject UseCase_IniciarSesion UseCaseIniciarSesion
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+
+<h3>Iniciar Sesión</h3>
+
+<input placeholder="Usuario" @bind="Email"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(Email))
+{
+    <span style="color: red;">El email es obligatorio</span><br>
+}
+
+<input placeholder="Contraseña" @bind="Password" type="password" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(Password))
+{
+    <span style="color: red;">La contraseña es obligatoria</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="IniciarSesion">Iniciar Sesión</button>
+
+@code {
+
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+
+    private void IniciarSesion()
+    {
+        showWarnings = true;
+
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            var usuario = UseCaseIniciarSesion.Ejecutar(Email, Password); // Ejecutar el caso de uso para iniciar sesión
+            
+            if(usuario != null)
+            {
+                ServicioAutorizacion.IniciarSesion(usuario); // Iniciar sesión
+                exito = "Inicio de sesión exitoso"; // Mostrar mensaje de éxito
+                warningMessage = string.Empty; // Limpiar el mensaje de advertencia
+                showWarnings = false; // Limpiar los mensajes de advertencia
+
+                NavigationManager.NavigateTo("/opciones"); // Redirigir a la página de opciones
+            }
+        }
+        catch(ValidacionException ex)
+        {
+            warningMessage = ex.Message;
+            exito = string.Empty;
+        }
+    }
+
+}

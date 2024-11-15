@@ -1,0 +1,80 @@
+@page "/alta-categoria"
+@inject UseCase_AltaCategoria UseCaseAltaCategoria
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+
+<h3>Alta de Categoría</h3>
+
+<input placeholder="Nombre" @bind="cat.Nombre"  /><br>
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<input placeholder="Descripción" @bind="cat.Descripcion"  /><br>
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+<button @onclick="AgregarCategoria" > Agregar</button>
+
+
+
+@code {
+
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    private Categoria cat = new Categoria();
+    private string warningMessage="";
+    private string exito="";
+    private void AgregarCategoria()
+    {
+        if(string.IsNullOrWhiteSpace(cat.Nombre))
+        {
+            warningMessage = "El nombre de la categoría es obligatorio";
+            exito = string.Empty;
+            return;
+        }
+        if(!ServicioAutorizacion.tienePermiso(Permiso.CategoriaAlta))
+        {
+            warningMessage = "No tiene permisos para realizar esta acción";
+            exito = string.Empty;
+            return;
+        }
+        try
+        {
+            UseCaseAltaCategoria.Ejecutar(cat); 
+            exito=$"La categoria {cat.Nombre} ha sido dada de alta con exito";
+            cat = new Categoria();   
+            warningMessage = string.Empty; 
+         }
+            catch (ValidacionException ex)
+            {
+                warningMessage=ex.Message;
+                System.Console.WriteLine("Error de Validacion: "+ex.Message);
+            }
+            catch (PermisosException ex)
+            {
+                warningMessage=ex.Message;
+                System.Console.WriteLine("Error de Permisos: "+ex.Message);
+            }
+            catch (Exception ex)
+            {
+                warningMessage = ex.Message; 
+                exito = string.Empty; 
+         }
+    }
+
+
+
+}

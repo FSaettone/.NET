@@ -1,0 +1,61 @@
+@page "/registro"
+@rendermode InteractiveServer
+@inject UseCase_AltaUsuario UseCaseAltaUsuario
+
+<h3>Registro de Usuario</h3>
+
+<input placeholder="Nombre" @bind="us.Nombre"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(us.Nombre))
+{
+    <span style="color: red;">El nombre es obligatorio</span><br>
+}
+
+<input placeholder="Apellido" @bind="us.Apellido"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(us.Apellido))
+{
+    <span style="color: red;">El apellido es obligatorio</span><br>
+}
+
+<input placeholder="Email" @bind="us.Email"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(us.Email))
+{
+    <span style="color: red;">El email es obligatorio</span><br>
+}
+
+<input placeholder="Contraseña" @bind="us.Password" type="password" /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(us.Password))
+{
+    <span style="color: red;">La contraseña es obligatoria</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+<button @onclick="AgregarUsuario">Registrar</button>
+
+@code {
+    private Usuario us = new Usuario();
+    private string exito = "";
+    private bool showWarnings = false;
+
+    private void AgregarUsuario()
+    {
+        showWarnings = true;
+
+        if (string.IsNullOrWhiteSpace(us.Nombre) ||
+            string.IsNullOrWhiteSpace(us.Apellido) ||
+            string.IsNullOrWhiteSpace(us.Email) ||
+            string.IsNullOrWhiteSpace(us.Password))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        UseCaseAltaUsuario.Ejecutar(us); 
+        exito = $"El usuario {us.Nombre} ha sido registrado con éxito";
+        us = new Usuario(); 
+        showWarnings = false; 
+    }
+}

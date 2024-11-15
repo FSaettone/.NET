@@ -1,73 +1,87 @@
-﻿using SGI.Aplicacion;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SGI.Aplicacion;
 using SGI.Repositorios;
 
+var serviceProvider = new ServiceCollection()
+    .AddDbContext<SGIContext>()
+    .AddScoped<IRepositorioCategoria, RepositorioCategoria>()
+    .AddScoped<IRepositorioProducto, RepositorioProducto>()
+    .AddScoped<IRepositorioTransaccion, RepositorioTransaccion>()
+    .AddScoped<IRepositorioUsuario, RepositorioUsuario>()
+    .AddScoped<IServicioAutorizacion, ServicioAutorizacion>()
+    .AddScoped<UseCase_AltaCategoria>()
+    .AddScoped<UseCase_AltaProducto>()
+    .AddScoped<UseCase_AltaTransaccion>()
+    .AddScoped<UseCase_AltaUsuario>()
+    .AddScoped<UseCase_BajaCategoria>()
+    .AddScoped<UseCase_BajaProducto>()
+    .AddScoped<UseCase_BajaTransaccion>()
+    .AddScoped<UseCase_BajaUsuario>()
+    .AddScoped<UseCase_ConsultaTransaccion>()
+    .AddScoped<UseCase_ListarTransacciones>()
+    .AddScoped<UseCase_ModificarCategoria>()
+    .AddScoped<UseCase_ModificarProducto>()
 
-IRepositorio<Categoria> repoCategoria = new RepositorioCategoriaTXT();
-IRepositorio<Producto> repoProducto = new RepositorioProductoTXT();
-IRepositorio<Transaccion> repoTransaccion = new RepositorioTransaccionTXT();
-IServicioAutorizacion servicioAutorizacion = new ServicioAutorizacion();
-
-var agregarProducto = new UseCase_AltaProducto(repoProducto, servicioAutorizacion);
-var agregarCategoria = new UseCase_AltaCategoria(repoCategoria, servicioAutorizacion);
-var agregarTransaccion = new UseCase_AltaTransaccion(repoTransaccion, servicioAutorizacion, repoProducto);
-
-var eliminarProducto = new UseCase_BajaProducto(repoProducto, repoTransaccion,servicioAutorizacion);
-var eliminarCategoria = new UseCase_BajaCategoria(repoProducto, repoCategoria, servicioAutorizacion);
-var eliminarTransaccion = new UseCase_BajaTransaccion(repoTransaccion, servicioAutorizacion, repoProducto);
-
-
-var modificarProducto = new UseCase_ModificarProducto(repoProducto, servicioAutorizacion);
-var modificarCategoria = new UseCase_ModificarCategoria(repoCategoria, servicioAutorizacion);
-
-
-var listarTransacciones = new UseCase_ListarTransacciones(repoTransaccion);
-var consultarTransaccion = new UseCase_ConsultaTransaccion(repoTransaccion, repoProducto);
-
-agregarCategoria.Ejecutar(new Categoria(){Nombre="Perfumeria", Descripcion="Productos de Perfumeria"},1);
-agregarCategoria.Ejecutar(new Categoria(){Nombre="Limpieza", Descripcion="Productos de limpieza"},1);
-
-agregarProducto.Ejecutar(new Producto(){Nombre="Shampoo", Descripcion="Shampoo para cabello", PrecioUnitario=100, CategoriaID=1},1);
-agregarProducto.Ejecutar(new Producto(){Nombre="Detergente", Descripcion="Detergente para ropa", PrecioUnitario=50, CategoriaID=2},1);
-agregarProducto.Ejecutar(new Producto(){Nombre="Jabon", Descripcion="Jabon para manos", PrecioUnitario=30, CategoriaID=2},1);
-
-agregarTransaccion.Ejecutar(new Transaccion(){ProductoID=1, Cantidad=20, Tipo=Tipo.Entrada},1);
-agregarTransaccion.Ejecutar(new Transaccion(){ProductoID=2, Cantidad=1, Tipo=Tipo.Entrada},1);
-agregarTransaccion.Ejecutar(new Transaccion(){ProductoID=3, Cantidad=3, Tipo=Tipo.Entrada},1);
+    .BuildServiceProvider();
 
 
-listarTransacciones.ListarTransacciones();
 
-consultarTransaccion.ConsultarTransaccion(1);
-agregarTransaccion.Ejecutar(new Transaccion(){ProductoID=1, Cantidad=10, Tipo=Tipo.Salida},1);
-consultarTransaccion.ConsultarTransaccion(1);
+SGISqlite.Inicializar();
+using (var context = new SGIContext())
+{
+    var repoCategoria = serviceProvider.GetService<IRepositorioCategoria>()!;
+    var repoProducto = serviceProvider.GetService<IRepositorioProducto>()!;
+    var repoTransaccion = serviceProvider.GetService<IRepositorioTransaccion>()!;
+    var repoUsuario = serviceProvider.GetService<IRepositorioUsuario>()!;  
+    
+    var useCaseAltaCategoria = serviceProvider.GetService<UseCase_AltaCategoria>()!;
+    var useCaseAltaProducto = serviceProvider.GetService<UseCase_AltaProducto>()!;
+    var useCaseAltaTransaccion = serviceProvider.GetService<UseCase_AltaTransaccion>()!;
+    var useCaseAltaUsuario = serviceProvider.GetService<UseCase_AltaUsuario>()!;
+    
+    var useCaseBajaCategoria = serviceProvider.GetService<UseCase_BajaCategoria>()!;
+    var useCaseBajaProducto = serviceProvider.GetService<UseCase_BajaProducto>()!;
+    var useCaseBajaTransaccion = serviceProvider.GetService<UseCase_BajaTransaccion>()!;
+    var useCaseBajaUsuario = serviceProvider.GetService<UseCase_BajaUsuario>()!;
+    
+    var useCaseConsultaTransaccion = serviceProvider.GetService<UseCase_ConsultaTransaccion>()!;
+    var useCaseListarTransacciones = serviceProvider.GetService<UseCase_ListarTransacciones>()!;
+    
+    var useCaseModificarCategoria = serviceProvider.GetService<UseCase_ModificarCategoria>()!;
+    var useCaseModificarProducto = serviceProvider.GetService<UseCase_ModificarProducto>()!;
 
-listarTransacciones.ListarTransacciones();
-
-listarTransacciones.ListarTransacciones(DateTime.Now.AddDays(-1), DateTime.Now);
 
 
-eliminarTransaccion.Ejecutar(1,1);
-eliminarTransaccion.Ejecutar(2,2); //aqui lanzara una excepcion de permisos, ya que el usuario 2 no tiene permisos para eliminar transacciones
+    var usuario = new Usuario { Nombre = "Facu", Password = "Saettone", Permisos = new List<Permiso> { Permiso.CategoriaAlta, Permiso.CategoriaBaja, Permiso.CategoriaModificacion, Permiso.ProductoAlta, Permiso.ProductoBaja, Permiso.ProductoModificacion, Permiso.TransaccionAlta, Permiso.TransaccionBaja, Permiso.UsuarioAlta, Permiso.UsuarioBaja, Permiso.UsuarioModificacion} };
+    var usuario2 = new Usuario { Nombre = "Nico", Password = "", Permisos = new List<Permiso> { Permiso.CategoriaAlta, Permiso.CategoriaBaja, Permiso.CategoriaModificacion, Permiso.ProductoAlta, Permiso.ProductoBaja, Permiso.ProductoModificacion, Permiso.TransaccionAlta, Permiso.TransaccionBaja} };
+    var categoria = new Categoria { Nombre = "Electrodomésticos" };
+    var transaccion = new Transaccion { Cantidad = 10, Tipo = Tipo.Entrada };
+    var producto = new Producto { Nombre = "Heladera", CategoriaID = categoria.ID, StockDisponible = 100 };
+    var producto2 = new Producto { Nombre = "Microondas", CategoriaID = categoria.ID, StockDisponible = 50 };
+
+    useCaseAltaCategoria.Ejecutar(categoria, 1);
+    useCaseAltaProducto.Ejecutar(producto, 1);
+    useCaseAltaProducto.Ejecutar(producto2, 1);
+    useCaseAltaUsuario.Ejecutar(usuario, 1);
+    useCaseAltaUsuario.Ejecutar(usuario2, 1);
+    useCaseAltaTransaccion.Ejecutar(transaccion, usuario.Id);
+    
 
 
-eliminarProducto.Ejecutar(1,1);
-eliminarProducto.Ejecutar(2,1); //aqui se eliminaran las transacciones asociadas al producto 2, y luego se eliminara el producto 2
+    useCaseBajaCategoria.Ejecutar(categoria.ID, usuario.Id);
+    useCaseBajaProducto.Ejecutar(producto.ID, usuario.Id);
+    useCaseBajaTransaccion.Ejecutar(transaccion.ID, usuario.Id);
+    useCaseBajaUsuario.Ejecutar(usuario2.Id, usuario.Id);
+    
+    useCaseListarTransacciones.Ejecutar();
+    useCaseConsultaTransaccion.Ejecutar(transaccion.ID);
+    useCaseModificarCategoria.Ejecutar(categoria, usuario.Id);
+    useCaseModificarProducto.Ejecutar(producto, usuario.Id);
+    
 
 
-modificarProducto.Ejecutar(new Producto(){ID=2, Nombre="Detergente en polvo", Descripcion="Detergente en polvo para ropa", PrecioUnitario=60, CategoriaID=2},1);
-modificarCategoria.Ejecutar(new Categoria(){ID=2, Nombre="Limpieza", Descripcion="Productos de limpieza y aseo"},1);
-
-
-eliminarCategoria.Ejecutar(1,1);
-
-
-listarTransacciones.ListarTransacciones(); // se listaran las transacciones restantes, solo la de ID 3
-
-Console.WriteLine("----------------------------------------Fin----------------------------------------");
-//poner breakpoint aca para ver los archivos generados, ya que seran eliminados al finalizar el programa
-File.Delete("Categorias.txt");
-File.Delete("Productos.txt");
-File.Delete("Transacciones.txt");
+    
+}
 
 
 

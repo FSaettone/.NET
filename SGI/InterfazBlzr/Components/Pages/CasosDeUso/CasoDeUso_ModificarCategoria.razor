@@ -1,0 +1,119 @@
+@page "/modificar-categoria"
+@inject UseCase_ModificarCategoria UseCaseModificarCategoria
+@inject IRepositorioCategoria RepositorioCategoria
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Modificar Categoría</h3>
+
+<select @onchange="CargarCategoria">
+    <option value="0">Seleccione una categoría</option>
+    @foreach (var categoria in categorias)
+    {
+        <option value="@categoria.ID">@categoria.Nombre</option>
+    }
+</select><br>
+@if (showWarnings && selectedCategoriaId == 0)
+{
+    <span style="color: red;">Debe seleccionar una categoría</span><br>
+}
+
+@if (categoria != null)
+{
+    <input placeholder="Nombre" @bind="categoria.Nombre" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(categoria.Nombre))
+    {
+        <span style="color: red;">El nombre es obligatorio</span><br>
+    }
+
+    <input placeholder="Descripción" @bind="categoria.Descripcion" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(categoria.Descripcion))
+    {
+        <span style="color: red;">La descripción es obligatoria</span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(exito))
+    {
+        <span style="color: green;">@exito </span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(warningMessage))
+    {
+        <span style="color: red;">@warningMessage </span><br>
+    }
+
+    <button @onclick="ModificarCategoria">Modificar</button>
+}
+
+@code {
+    private List<Categoria> categorias = new List<Categoria>();
+    private Categoria? categoria;
+    private int selectedCategoriaId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        categorias = RepositorioCategoria.ObtenerTodos();
+    }
+
+    private void CargarCategoria(ChangeEventArgs e)
+    {
+        if (e.Value != null && int.TryParse(e.Value.ToString(), out int categoriaID))
+        {
+            selectedCategoriaId = categoriaID;
+            categoria = RepositorioCategoria.ObtenerPorID(categoriaID);
+        }
+    }
+
+    private void ModificarCategoria()
+    {
+        showWarnings = true;
+
+        if (selectedCategoriaId == 0 ||
+            categoria == null ||
+            string.IsNullOrWhiteSpace(categoria.Nombre) ||
+            string.IsNullOrWhiteSpace(categoria.Descripcion))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        if (!ServicioAutorizacion.tienePermiso(Permiso.CategoriaModificacion))
+        {
+            warningMessage = "No tiene permisos para realizar esta acción";
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseModificarCategoria.Ejecutar(categoria);
+            exito = "La categoría ha sido modificada con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            categorias = RepositorioCategoria.ObtenerTodos(); // Actualizar la lista de categorías
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

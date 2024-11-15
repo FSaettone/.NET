@@ -2,13 +2,17 @@ using System;
 
 namespace SGI.Aplicacion;
 
-public class Producto : Entidad
+public class Producto
 {
-    public double PrecioUnitario { get; set; }
-    public int StockDisponible { get; set; }
+    public int ID { get; set; }
+    public string Nombre { get; set; } = "";
+    public string Descripcion { get; set; } = "";
+    public double? PrecioUnitario { get; set; }
+    public int? StockDisponible { get; set; }
+    public DateTime FechaCreacion { get; set; }
+    public DateTime FechaUltimaModificacion { get; set; }
     public int? CategoriaID { get; set; }
-
-
+    public int ProductoID { get; internal set; }
 
     public Producto()
     {

@@ -1,0 +1,132 @@
+@page "/modificar-permiso"
+@inject IRepositorioUsuario RepositorioUsuario
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@inject UseCase_AltaPermiso UseCaseAltaPermiso
+@rendermode InteractiveServer
+
+
+<h3>Modificar permisos a usuario</h3>
+
+<select @onchange="CargarPermisosUsuario">
+    <option value="0">Seleccione un usuario</option>
+    @foreach (var usuario in usuarios)
+    {
+        <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido</option>
+    }
+</select><br>
+@if (showWarnings && selectedUserId == 0)
+{
+    <span style="color: red;">Debe seleccionar un usuario</span><br>
+}
+
+<h4>Permisos</h4>
+@foreach (var permiso in permisosDisponibles)
+{
+    <label>
+        <input type="checkbox" @bind="permisoSeleccionado[permiso]" /> @permiso
+    </label><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="AsignarPermisos">Asignar Permisos</button>
+
+@code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    private int selectedUserId = 0;
+    private List<Permiso> permisosDisponibles = Enum.GetValues(typeof(Permiso)).Cast<Permiso>().ToList();
+    private Dictionary<Permiso, bool> permisoSeleccionado = new Dictionary<Permiso, bool>();
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        usuarios = RepositorioUsuario.ObtenerTodos();
+        foreach (var permiso in permisosDisponibles)
+        {
+            permisoSeleccionado[permiso] = false;
+        }
+    }
+
+     private async Task CargarPermisosUsuario(ChangeEventArgs e)
+    {
+        if (e.Value != null && int.TryParse(e.Value.ToString(), out int userId))
+        {
+            selectedUserId = userId;
+        }
+        else
+        {
+            selectedUserId = 0;
+        }
+        if (selectedUserId != 0)
+        {
+            var usuario = await Task.Run(() => RepositorioUsuario.ObtenerPorID(selectedUserId)); // Obtener el usuario seleccionado
+            if (usuario != null)
+            {
+                foreach (var permiso in permisosDisponibles)
+                {
+                    permisoSeleccionado[permiso] = usuario.Permisos.Contains(permiso); // Marcar permisos ya asignados
+                }
+            }
+        }
+    }
+
+    private void AsignarPermisos()
+    {
+        showWarnings = true;
+
+        if (selectedUserId == 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        var permisosAAsignar = permisoSeleccionado.Where(p => p.Value).Select(p => p.Key).ToList();
+
+
+
+        try
+        {
+            var usuario = RepositorioUsuario.ObtenerPorID(selectedUserId);
+            if (usuario == null)
+            {
+                warningMessage = "El usuario seleccionado no existe";
+                exito = string.Empty;
+                return;
+            }
+            UseCaseAltaPermiso.Ejecutar(permisosAAsignar,usuario);
+            exito = "Permisos asignados con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

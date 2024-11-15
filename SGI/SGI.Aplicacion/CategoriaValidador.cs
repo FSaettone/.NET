@@ -12,7 +12,7 @@ public class CategoriaValidador
         }
     }
 
-    public void ValidarBaja(List<Producto> productos, int ID)
+    public void  ValidarBaja(List<Producto> productos, int ID)
     {
         foreach (var producto in productos)
         {

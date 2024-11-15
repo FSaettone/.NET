@@ -2,6 +2,6 @@ namespace SGI.Aplicacion;
 
 public enum Tipo
 {
-    Entrada,
-    Salida
+    Entrada=1,
+    Salida=2,
 }

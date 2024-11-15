@@ -1,0 +1,133 @@
+@page "/modificar-producto"
+@inject UseCase_ModificarProducto UseCaseModificarProducto
+@inject IRepositorioProducto RepositorioProducto
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Modificar Producto</h3>
+
+<select @onchange="CargarProducto">
+    <option value="0">Seleccione un producto</option>
+    @foreach (var producto in productos)
+    {
+        <option value="@producto.ID">@producto.Nombre</option>
+    }
+</select><br>
+@if (showWarnings && selectedProductoId == 0)
+{
+    <span style="color: red;">Debe seleccionar un producto</span><br>
+}
+
+@if (producto != null)
+{
+    <input placeholder="Nombre" @bind="producto.Nombre" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(producto.Nombre))
+    {
+        <span style="color: red;">El nombre es obligatorio</span><br>
+    }
+
+    <input placeholder="Descripción" @bind="producto.Descripcion" /><br>
+    @if (showWarnings && string.IsNullOrWhiteSpace(producto.Descripcion))
+    {
+        <span style="color: red;">La descripción es obligatoria</span><br>
+    }
+
+    <input placeholder="Precio" @bind="producto.PrecioUnitario" type="number" /><br>
+    @if (showWarnings && producto.PrecioUnitario <= 0)
+    {
+        <span style="color: red;">El precio debe ser mayor que cero</span><br>
+    }
+
+    <input placeholder="Stock Disponible" @bind="producto.StockDisponible" type="number" /><br>
+    @if (showWarnings && producto.StockDisponible < 0)
+    {
+        <span style="color: red;">El stock disponible no puede ser negativo</span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(exito))
+    {
+        <span style="color: green;">@exito </span><br>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(warningMessage))
+    {
+        <span style="color: red;">@warningMessage </span><br>
+    }
+
+    <button @onclick="ModificarProducto">Modificar</button>
+}
+
+@code {
+    private List<Producto> productos = new List<Producto>();
+    private Producto? producto;
+    private int selectedProductoId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else if (!ServicioAutorizacion.tienePermiso(Permiso.ProductoModificacion))
+        {
+            NavigationManager.NavigateTo("/"); // Redirigir si no tiene permiso
+        }
+        else
+        {
+            productos = RepositorioProducto.ObtenerTodos();
+        }
+    }
+
+    private void CargarProducto(ChangeEventArgs e)
+    {
+        if (e.Value != null && int.TryParse(e.Value.ToString(), out int productoId))
+        {
+            selectedProductoId = productoId;
+            producto = RepositorioProducto.ObtenerPorID(productoId);
+        }
+    }
+
+    private void ModificarProducto()
+    {
+        showWarnings = true;
+
+        if (selectedProductoId == 0 ||
+            producto == null ||
+            string.IsNullOrWhiteSpace(producto.Nombre) ||
+            string.IsNullOrWhiteSpace(producto.Descripcion) ||
+            producto.PrecioUnitario <= 0 ||
+            producto.StockDisponible < 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseModificarProducto.Ejecutar(producto);
+            exito = "El producto ha sido modificado con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            productos = RepositorioProducto.ObtenerTodos(); // Actualizar la lista de productos
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

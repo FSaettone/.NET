@@ -1,0 +1,120 @@
+@page "/alta-producto"
+@inject UseCase_AltaProducto UseCaseAltaProducto
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject IRepositorioCategoria RepositorioCategoria
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Alta de Producto</h3>
+
+<input placeholder="Nombre" @bind="prod.Nombre"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(prod.Nombre))
+{
+    <span style="color: red;">El nombre es obligatorio</span><br>
+}
+
+<input placeholder="Descripción" @bind="prod.Descripcion"  /><br>
+@if (showWarnings && string.IsNullOrWhiteSpace(prod.Descripcion))
+{
+    <span style="color: red;">La descripción es obligatoria</span><br>
+}
+
+<input placeholder="Precio Unitario" @bind="prod.PrecioUnitario" type="number" step="1.0" /><br>
+@if (showWarnings && prod.PrecioUnitario <= 0)
+{
+    <span style="color: red;">El precio unitario debe ser mayor que cero</span><br>
+}
+
+<input placeholder="Stock Disponible" @bind="prod.StockDisponible" type="number" /><br>
+@if (showWarnings && prod.StockDisponible < 0)
+{
+    <span style="color: red;">El stock disponible no puede ser negativo</span><br>
+}
+
+<select @bind="prod.CategoriaID">
+    <option value="0">Seleccione una categoría</option>
+    @foreach (var categoria in categorias)
+    {
+        <option value="@categoria.ID">@categoria.Nombre</option>
+    }
+</select><br>
+@if (showWarnings && prod.CategoriaID == 0)
+{
+    <span style="color: red;">Debe seleccionar una categoría</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="AgregarProducto">Agregar</button>
+
+@code {
+
+    private Producto prod = new Producto();
+    private List<Categoria> categorias = new List<Categoria>();
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        categorias = RepositorioCategoria.ObtenerTodos();
+    }
+
+    private void AgregarProducto()
+    {
+        showWarnings = true;
+
+        if (string.IsNullOrWhiteSpace(prod.Nombre) ||
+            string.IsNullOrWhiteSpace(prod.Descripcion) ||
+            prod.PrecioUnitario <= 0 ||
+            prod.StockDisponible < 0 ||
+            prod.CategoriaID == 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        if (!ServicioAutorizacion.tienePermiso(Permiso.ProductoAlta))
+        {
+            warningMessage = "No tiene permisos para realizar esta acción";
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseAltaProducto.Ejecutar(prod);
+            exito = $"El producto {prod.Nombre} ha sido dado de alta con éxito";
+            prod = new Producto(); 
+            warningMessage = string.Empty; 
+            showWarnings = false; 
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty; 
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty; 
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo."+ ex.Message;
+            exito = string.Empty; 
+        }
+    }
+}

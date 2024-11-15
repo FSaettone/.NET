@@ -1,0 +1,84 @@
+@page "/baja-usuario"
+@inject UseCase_BajaUsuario UseCaseBajaUsuario
+@inject IRepositorioUsuario RepositorioUsuario
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Baja de Usuario</h3>
+
+<select @bind="selectedUsuarioId">
+    <option value="0">Seleccione un usuario</option>
+    @foreach (var usuario in usuarios)
+    {
+        <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido</option>
+    }
+</select><br>
+@if (showWarnings && selectedUsuarioId == 0)
+{
+    <span style="color: red;">Debe seleccionar un usuario</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="BajaUsuario">Dar de Baja Usuario</button>
+
+@code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    private int selectedUsuarioId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        usuarios = RepositorioUsuario.ObtenerTodos();
+    }
+
+    private void BajaUsuario()
+    {
+        showWarnings = true;
+
+        if (selectedUsuarioId == 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseBajaUsuario.Ejecutar(selectedUsuarioId);
+            exito = "El usuario ha sido dado de baja con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            usuarios = RepositorioUsuario.ObtenerTodos(); // Actualizar la lista de usuarios
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

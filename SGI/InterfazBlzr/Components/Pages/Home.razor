@@ -1,0 +1,31 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Routing
+@rendermode InteractiveServer
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+
+<h3>Bienvenido</h3>
+
+<button @onclick="NavigateToRegister">Registrarse</button>
+<button @onclick="NavigateToLogin">Iniciar Sesión</button>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        if (ServicioAutorizacion.EstaLogueado())   // si ya esta logeado y apreta home lo redirige a opciones
+        {
+            NavigationManager.NavigateTo("/opciones");
+        }
+    }
+    private void NavigateToRegister()
+    {
+        NavigationManager.NavigateTo("/registro");
+    }
+
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/inicio-sesion");
+    }
+
+}

@@ -1,0 +1,81 @@
+@page "/listar-transacciones"
+@inject UseCase_ListarTransacciones UseCaseListarTransacciones
+@inject IRepositorioTransaccion RepositorioTransaccion
+@inject IRepositorioProducto RepositorioProducto
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Listar Transacciones</h3>
+
+<h4>Filtrar por Fecha</h4>
+<input type="date" @bind="fechaInicio" />
+<input type="date" @bind="fechaFin" />
+<button @onclick="FiltrarTransacciones">Filtrar</button>
+
+@if (showWarnings && (fechaInicio == null || fechaFin == null))
+{
+    <span style="color: red;">Debe seleccionar un rango de fechas</span><br>
+}
+
+<h4>Transacciones</h4>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaccion in transacciones)
+        {
+            <tr>
+                <td>@transaccion.ID</td>
+                <td>@BuscarProducto(transaccion.ProductoID)</td>
+                <td>@transaccion.Cantidad</td>
+                <td>@transaccion.Tipo</td>
+                <td>@transaccion.FechaTransaccion</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Transaccion> transacciones = new List<Transaccion>();
+    private List<Producto> productos = new List<Producto>();
+    private DateTime? fechaInicio;
+    private DateTime? fechaFin;
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        transacciones = UseCaseListarTransacciones.Ejecutar();
+        productos = RepositorioProducto.ObtenerTodos();
+    }
+
+    private string BuscarProducto(int productoId)
+    {
+        var producto = productos.FirstOrDefault(p => p.ID == productoId);
+        return producto?.Nombre ?? "No encontrado";
+    }
+
+    private void FiltrarTransacciones()
+    {
+        showWarnings = true;
+
+        if (fechaInicio == null || fechaFin == null)
+        {
+            return;
+        }
+
+        transacciones = UseCaseListarTransacciones.ListarTransacciones(fechaInicio.Value, fechaFin.Value);
+        showWarnings = false;
+    }
+}

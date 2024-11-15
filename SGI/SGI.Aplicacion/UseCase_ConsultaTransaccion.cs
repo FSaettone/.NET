@@ -2,9 +2,9 @@ using System;
 
 namespace SGI.Aplicacion;
 
-public class UseCase_ConsultaTransaccion (IRepositorio<Transaccion> repoTransaccion, IRepositorio<Producto> repoProducto)
+public class UseCase_ConsultaTransaccion (IRepositorioTransaccion repoTransaccion, IRepositorioProducto repoProducto)
 {
-    public void ConsultarTransaccion(int ID)
+    public void Ejecutar(int ID)
     {
         try
         {

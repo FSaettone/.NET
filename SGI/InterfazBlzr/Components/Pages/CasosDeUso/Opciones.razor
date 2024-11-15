@@ -1,0 +1,157 @@
+@page "/opciones"
+@rendermode InteractiveServer
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+
+<h2>Bienvenido a SGI.Net</h2>
+<h4>Opciones Disponibles</h4>
+
+@if (ServicioAutorizacion.EstaLogueado())
+{
+    <ul>
+
+        @if (ServicioAutorizacion.tienePermiso(Permiso.CategoriaAlta))
+        { 
+            <li><button @onclick="NavigateToAltaCategoria">Alta de Categoría</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.ProductoAlta))
+        {
+            <li><button @onclick="NavigateToAltaProducto">Alta de Producto</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.TransaccionAlta))
+        {
+            <li><button @onclick="NavigateToAltaTransaccion">Alta de Transacción</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.UsuarioAlta))
+        {
+            <li><button @onclick="NavigateToAltaUsuario">Alta de Usuario</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.PermisoModificar))
+        {
+            <li><button @onclick="NavigateToModificarPermiso">Modificar Permisos</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.CategoriaBaja))
+        {
+            <li><button @onclick="NavigateToBajaCategoria">Baja de Categoría</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.ProductoBaja))
+        {
+            <li><button @onclick="NavigateToBajaProducto">Baja de Producto</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.TransaccionBaja))
+        {
+            <li><button @onclick="NavigateToBajaTransaccion">Baja de Transacción</button></li>
+        }
+        
+
+        @if (ServicioAutorizacion.tienePermiso(Permiso.UsuarioBaja))
+        {
+            <li><button @onclick="NavigateToBajaUsuario">Baja de Usuario</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.TransaccionListar))
+        {
+            <li><button @onclick="NavigateToListarTransacciones">Listar Transacciones</button></li>
+        }
+        @if (ServicioAutorizacion.tienePermiso(Permiso.CategoriaModificacion))
+        {
+            <li><button @onclick="NavigateToModificarCategoria">Modificar Categoría</button></li>
+        }
+
+        @if (ServicioAutorizacion.tienePermiso(Permiso.ProductoModificacion))
+        {
+            <li><button @onclick="NavigateToModificarProducto">Modificar Producto</button></li>
+        }
+
+        @if (ServicioAutorizacion.tienePermiso(Permiso.UsuarioModificacion))
+        {
+            <li><button @onclick="NavigateToModificarUsuario">Modificar Usuario</button></li>
+        }
+
+        <li><button @onclick="NavigateToModificarDatosPersonales">Modificar Datos Personales</button></li>
+        
+        
+        <CerrarSesion />
+        <!-- Agrega más opciones según los permisos disponibles -->
+    </ul>
+}
+else
+{
+    <p>No tienes permisos para ver esta página. Por favor, inicia sesión.</p>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())
+        {
+            NavigationManager.NavigateTo("/"); 
+        }
+    }
+
+    private void NavigateToAltaCategoria()
+    {
+        NavigationManager.NavigateTo("/alta-categoria");
+    }
+    private void NavigateToAltaProducto()
+    {
+        NavigationManager.NavigateTo("/alta-producto");
+    }
+
+    private void NavigateToAltaTransaccion()
+    {
+        NavigationManager.NavigateTo("/alta-transaccion");
+    }
+
+    private void NavigateToModificarPermiso()
+    {
+        NavigationManager.NavigateTo("/modificar-permiso");
+    }
+
+    private void NavigateToAltaUsuario()
+    {
+        NavigationManager.NavigateTo("/alta-usuario");
+    } 
+
+    private void NavigateToBajaCategoria()
+    {
+        NavigationManager.NavigateTo("/baja-categoria");
+    }
+
+    private void NavigateToBajaProducto()
+    {
+        NavigationManager.NavigateTo("/baja-producto");
+    }
+
+    private void NavigateToBajaTransaccion()
+    {
+        NavigationManager.NavigateTo("/baja-transaccion");
+    }
+
+    private void NavigateToBajaUsuario()
+    {
+        NavigationManager.NavigateTo("/baja-usuario");
+    }
+    private void NavigateToListarTransacciones()
+    {
+        NavigationManager.NavigateTo("/listar-transacciones");
+    }
+
+    private void NavigateToModificarUsuario()
+    {
+        NavigationManager.NavigateTo("/modificar-usuario");
+    }
+    private void NavigateToModificarCategoria()
+    {
+        NavigationManager.NavigateTo("/modificar-categoria");
+    }
+
+    private void NavigateToModificarProducto()
+    {
+        NavigationManager.NavigateTo("/modificar-producto");
+    }
+
+    private void NavigateToModificarDatosPersonales()
+    {
+        NavigationManager.NavigateTo("/modificar-datos-personales");
+    }   
+}

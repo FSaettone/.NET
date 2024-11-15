@@ -1,0 +1,33 @@
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<button @onclick="MostrarConfirmacion">Cerrar Sesión</button>
+
+@if (mostrarConfirmacion)
+{
+    <div class="confirmacion">
+        <p>¿Está seguro de que desea cerrar sesión?</p>
+        <button @onclick="ConfirmarCerrarSesion">Sí</button>
+        <button @onclick="CancelarCerrarSesion">No</button>
+    </div>
+}
+
+@code {
+    private bool mostrarConfirmacion = false;
+
+    private void MostrarConfirmacion()
+    {
+        mostrarConfirmacion = true;
+    }
+
+    private void ConfirmarCerrarSesion()
+    {
+        ServicioAutorizacion.CerrarSesion();
+        NavigationManager.NavigateTo("/inicio-sesion");
+    }
+
+    private void CancelarCerrarSesion()
+    {
+        mostrarConfirmacion = false;
+    }
+}

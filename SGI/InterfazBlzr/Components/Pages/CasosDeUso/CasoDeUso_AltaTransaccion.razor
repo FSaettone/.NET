@@ -1,0 +1,116 @@
+@page "/alta-transaccion"
+@inject UseCase_AltaTransaccion UseCaseAltaTransaccion
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject IRepositorioProducto RepositorioProducto
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Alta de Transacción</h3>
+
+<select @bind="transaccion.ProductoID">
+    <option value="0">Seleccione un producto</option>
+    @foreach (var producto in productos)
+    {
+        <option value="@producto.ID">@producto.Nombre</option>
+    }
+</select><br>
+@if (showWarnings && transaccion.ProductoID == 0)
+{
+    <span style="color: red;">Debe seleccionar un producto</span><br>
+}
+
+<input placeholder="Cantidad" @bind="transaccion.Cantidad" type="number" /><br>
+@if (showWarnings && transaccion.Cantidad <= 0)
+{
+    <span style="color: red;">La cantidad debe ser mayor que cero</span><br>
+}
+
+<label>
+    <input type="radio" name="tipo" value="Entrada" @onchange="() => transaccion.Tipo = Tipo.Entrada" /> Entrada
+</label>
+<label>
+    <input type="radio" name="tipo" value="Salida" @onchange="() => transaccion.Tipo = Tipo.Salida" /> Salida
+</label><br>
+@if (showWarnings && transaccion.Tipo == default(Tipo))
+{
+    <span style="color: red;">Debe seleccionar un tipo de transacción</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="AgregarTransaccion">Agregar</button>
+
+@code {
+    private Transaccion transaccion = new Transaccion();
+    private List<Producto> productos = new List<Producto>();
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        productos = RepositorioProducto.ObtenerTodos();
+    }
+
+    private void AgregarTransaccion()
+    {
+        showWarnings = true;
+
+        if (transaccion.ProductoID == 0 ||
+            transaccion.Cantidad <= 0 ||
+            transaccion.Tipo == default(Tipo))
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        if (!ServicioAutorizacion.tienePermiso(Permiso.TransaccionAlta))
+        {
+            warningMessage = "No tiene permisos para realizar esta acción";
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseAltaTransaccion.Ejecutar(transaccion); 
+            exito = "La transacción ha sido registrada con éxito";
+            transaccion = new Transaccion();
+            warningMessage = string.Empty; 
+            showWarnings = false; 
+            productos = RepositorioProducto.ObtenerTodos(); // Actualizar la lista de productos
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (StockInsuficienteException ex)
+        {
+            warningMessage = "Error de Stock: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (PermisosException ex)
+        {
+            warningMessage = "Error de Permisos: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

@@ -10,8 +10,11 @@ public enum Permiso
     CategoriaModificacion,
     TransaccionAlta,
     TransaccionBaja,
+    TransaccionListar,
     UsuarioAlta,
     UsuarioBaja,
     UsuarioModificacion,
+    PermisoModificar,
+    
     
 }

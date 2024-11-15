@@ -1,0 +1,79 @@
+@page "/baja-categoria"
+@rendermode InteractiveServer
+@inject UseCase_BajaCategoria UseCaseBajaCategoria
+@inject IRepositorioCategoria RepositorioCategoria
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavigationManager
+
+<h3>Baja de Categoría</h3>
+
+<select @bind="selectedCategoriaId">
+    <option value="0">Seleccione una categoría</option>
+    @foreach (var categoria in categorias)
+    {
+        <option value="@categoria.ID">@categoria.Nombre</option>
+    }
+</select><br>
+@if (showWarnings && selectedCategoriaId == 0)
+{
+    <span style="color: red;">Debe seleccionar una categoría</span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <span style="color: green;">@exito </span><br>
+}
+
+@if (!string.IsNullOrWhiteSpace(warningMessage))
+{
+    <span style="color: red;">@warningMessage </span><br>
+}
+
+<button @onclick="BajaCategoria">Dar de Baja Categoría</button>
+
+@code {
+    private List<Categoria> categorias = new List<Categoria>();
+    private int selectedCategoriaId = 0;
+    private string exito = "";
+    private string warningMessage = "";
+    private bool showWarnings = false;
+
+    protected override void OnInitialized()
+    {
+        if (!ServicioAutorizacion.EstaLogueado())   // si no esta logueado no permite acceder a la pagina
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        categorias = RepositorioCategoria.ObtenerTodos();
+    }
+
+    private void BajaCategoria()
+    {
+        showWarnings = true;
+
+        if (selectedCategoriaId == 0)
+        {
+            exito = string.Empty;
+            return;
+        }
+
+        try
+        {
+            UseCaseBajaCategoria.Ejecutar(selectedCategoriaId);
+            exito = "La categoría ha sido dada de baja con éxito";
+            warningMessage = string.Empty;
+            showWarnings = false;
+            categorias = RepositorioCategoria.ObtenerTodos(); // Actualizar la lista de categorías
+        }
+        catch (ValidacionException ex)
+        {
+            warningMessage = "Error de Validación: " + ex.Message;
+            exito = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo." + ex.Message;
+            exito = string.Empty;
+        }
+    }
+}

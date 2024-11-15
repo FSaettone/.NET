@@ -1,0 +1,45 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\InterfazBlzr.bundle.scp.css",
+      "PackagePath": "staticwebassets\\InterfazBlzr.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "C:\\Users\\facus\\proyectosDotnet\\SGI\\InterfazBlzr\\wwwroot\\styles.css",
+      "PackagePath": "staticwebassets\\styles.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.InterfazBlzr.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.InterfazBlzr.props",
+      "PackagePath": "build\\InterfazBlzr.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.InterfazBlzr.props",
+      "PackagePath": "buildMultiTargeting\\InterfazBlzr.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.InterfazBlzr.props",
+      "PackagePath": "buildTransitive\\InterfazBlzr.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
